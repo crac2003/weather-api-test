@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +11,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Weather.Domain.Http;
+using Weather.Domain.Services;
+using Weather.Service.OpenWeather;
 
 namespace WeatherApi
 {
@@ -26,6 +30,20 @@ namespace WeatherApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddSingleton<IWeatherService, WeatherService>();
+            services.AddSingleton<IBackupService, LocalBackupService>();
+            services.AddSingleton<IFileSystemService, FileSystemService>();
+            services.AddSingleton<IWeatherHttpClient, WeatherHttpClient>();
+
+            services.AddSingleton<IWeatherDataProvider, OpenWeatherProvider>();
+
+            var configBuilder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true);
+            var config = configBuilder.Build();
+            services.AddSingleton<IOpenWeatherConfig>(config.GetSection("OpenWeather").Get<OpenWeatherConfig>());
+            services.AddSingleton<ILocalBackupConfig>(config.GetSection("ApplicationSettings").Get<BackUpConfig>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -44,5 +62,16 @@ namespace WeatherApi
             app.UseHttpsRedirection();
             app.UseMvc();
         }
+    }
+
+    public class BackUpConfig : ILocalBackupConfig
+    {
+        public string BackupFolder { get; set; }
+    }
+
+    public class OpenWeatherConfig : IOpenWeatherConfig
+    {
+        public string OpenWeatherUrl { get; set; }
+        public string OpenWeatherKey { get; set; }
     }
 }

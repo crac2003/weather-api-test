@@ -7,27 +7,20 @@ namespace Weather.Domain.Models.Requests
     public class GetCityRequest
     {
         public int Id { get; }
-        public string Name { get; }
 
-        protected GetCityRequest(int id, string name)
+        protected GetCityRequest(int id)
         {
             Id = id;
-            Name = name;
         }
 
-        public static GetCityRequest Create(int id, string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                throw new InvalidOperationException($"Name cannot be empty ({id}, {name})");
-            }
-
+        public static GetCityRequest Create(int id)
+        { 
             if (id <= 0)
             {
                 throw new InvalidOperationException("Id cannot be less than zero");
             }
 
-            return new GetCityRequest(id, name);
+            return new GetCityRequest(id);
         }
     }
 }
