@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
@@ -11,9 +8,9 @@ namespace Weather.Domain.Http
     {
         private static HttpClient _client;
 
-        public WeatherHttpClient()
+        public WeatherHttpClient(HttpClientHandler handler = null)
         {
-            _client = new HttpClient();
+            _client = new HttpClient(handler ?? new HttpClientHandler());
         }
 
         public async Task<TResult> GetAsync<TResult>(string url)
